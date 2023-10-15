@@ -25,3 +25,6 @@ ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch
 ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
 ubuntu/shell-global-util-Do-not-move-snap-apps-to-gnome-apps-sco.patch
+overview-Handle-unredirection-in-OverviewShown-state-mach.patch
+layout-Destroy-panel-barrier-on-shutdown.patch
+remove-dbus-restrictions-with-pika-gnome-session.patch

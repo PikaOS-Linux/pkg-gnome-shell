@@ -1,0 +1,26 @@
+--- gnome-shell-45.0.orig/js/ui/panel.js
++++ gnome-shell-45.0/js/ui/panel.js
+@@ -551,7 +551,6 @@ class QuickSettings extends PanelMenu.Bu
+         this._powerProfiles = new PowerProfileStatus.Indicator();
+         this._rfkill = new RFKillStatus.Indicator();
+         this._autoRotate = new AutoRotateStatus.Indicator();
+-        this._unsafeMode = new UnsafeModeIndicator();
+         this._backgroundApps = new BackgroundAppsStatus.Indicator();
+ 
+         // add privacy-related indicators before any external indicators
+@@ -575,7 +574,6 @@ class QuickSettings extends PanelMenu.Bu
+         this._indicators.add_child(this._rfkill);
+         this._indicators.add_child(this._autoRotate);
+         this._indicators.add_child(this._volumeOutput);
+-        this._indicators.add_child(this._unsafeMode);
+         this._indicators.add_child(this._system);
+ 
+         // add our quick settings items before any external ones
+@@ -603,7 +601,6 @@ class QuickSettings extends PanelMenu.Bu
+         this._addItemsBefore(this._backlight.quickSettingsItems, sibling);
+         this._addItemsBefore(this._rfkill.quickSettingsItems, sibling);
+         this._addItemsBefore(this._autoRotate.quickSettingsItems, sibling);
+-        this._addItemsBefore(this._unsafeMode.quickSettingsItems, sibling);
+ 
+         // append background apps
+         this._backgroundApps.quickSettingsItems.forEach(

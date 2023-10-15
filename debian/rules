@@ -2,7 +2,6 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 export DEB_LDFLAGS_MAINT_APPEND = -Wl,-O1 -Wl,-z,defs
-DEB_BUILD_OPTIONS=nocheck
 
 %:
 	dh $@ --with bash_completion
@@ -22,18 +21,42 @@ CONFFLAGS += -Dtests=false
 endif
 
 override_dh_auto_configure:
-		GSETTINGS_SCHEMA_DIR=/opt/mutter-vrr/share/glib-2.0/schemas/:$(GSETTINGS_SCHEMA_DIR) PKG_CONFIG_PATH=/opt/mutter-vrr/lib/x86_64-linux-gnu/pkgconfig:$(PKG_CONFIG_PATH) LD_LIBRARY_PATH=/opt/mutter-vrr/lib/x86_64-linux-gnu:/opt/mutter-vrr/lib/x86_64-linux-gnu/mutter-11:/opt/mutter-vrr/lib/x86_64-linux-gnu/mutter-11/plugins:$(LD_LIBRARY_PATH) PATH=/opt/mutter-vrr/bin:$(PATH) dh_auto_configure -- \
-		--prefix=/opt/mutter-vrr \
-		--libdir=lib \
+	dh_auto_configure -- \
+		--libdir=/usr/lib \
 		-Dextensions-tool:bash_completion=enabled \
 		$(CONFFLAGS)
 
-
 override_dh_makeshlibs:
-	true
+	dh_makeshlibs -X/usr/lib/gnome-shell/
 
 override_dh_shlibdeps:
-	true
+	# gnome-shell uses mutters private mutter-clutter-1.0.so etc.
+	dh_shlibdeps -l"usr/lib/$(DEB_HOST_MULTIARCH)/mutter"
+
+# Upstream test timeouts assume an otherwise unloaded system, but that
+# isn't necessarily the case for a porterbox or multiple parallel builds.
+# Keep the timeout reasonably short for architectures where interactive
+# debugging is more likely, but extend it a lot on architectures that might
+# be very slow or using qemu for buildds.
+ifneq ($(filter amd64 i386,$(DEB_HOST_ARCH_CPU)),)
+test_timeout_multiplier = 3
+else
+test_timeout_multiplier = 20
+endif
+
+meson_test_options = --timeout-multiplier $(test_timeout_multiplier)
+
+ifneq ($(filter mips%,$(DEB_HOST_ARCH_CPU)),)
+# gnome-shell on mips(64)el works on a real GPU (in practice usually an
+# AMD GPU), but crashes when using llvmpipe or softpipe, which is all that
+# is available on the buildds, so we only run the unit tests at build time
+# and skip the tests that would run the whole Shell. See discussion in
+# https://salsa.debian.org/gnome-team/gnome-shell/-/merge_requests/71
+meson_test_options += --no-suite shell
+endif
 
 override_dh_auto_test:
-	true
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	env XDG_CACHE_HOME="$(shell mktemp -d -t cache-XXXXXXXX)" \
+	dbus-run-session xvfb-run -a dh_auto_test -- $(meson_test_options)
+endif
