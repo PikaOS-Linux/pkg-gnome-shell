@@ -13,7 +13,7 @@ for i in $(cat ../patches/series) ; do echo "Applying Patch: $i" && patch -Np1 -
 apt-get build-dep ./ -y
 
 # Build package
-LOGNAME=root dh_make --createorig -y -l -p gnome-shell_45.0
+LOGNAME=root dh_make --createorig -y -l -p gnome-shell_45.1
 dpkg-buildpackage --no-sign
 
 # Move the debs to output
